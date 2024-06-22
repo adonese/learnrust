@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use axum::{
     body::{to_bytes, Body},
     http::{Request, StatusCode},
@@ -27,6 +29,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(root))
         .route("/log", get(log))
+        .route("/extern", post(send_extrn))
         .route("/register", post(create_user));
     let listener = tokio::net::TcpListener::bind("localhost:8080")
         .await
@@ -42,6 +45,21 @@ async fn log(Json(body): Json<Value>) -> impl IntoResponse {
 
     info!("the request is: {}", body);
     Json("this is me")
+}
+
+async fn send_extrn(payload: Json<Message>) -> impl IntoResponse {
+    let mut req: HashMap<&str, &str> = HashMap::new();
+    req.insert("mobile", payload.mobile.as_str());
+    req.insert("password", payload.password.as_str());
+    req["user_publickey"] = "user_public_key";
+
+    let b = reqwest::Client::new();
+    let res = b
+        .post("https://dapi.nil.sd/register")
+        .json(&req)
+        .send()
+        .await;
+    info!("the response is: {:?}", res);
 }
 
 async fn create_user(Json(payload): Json<Req>) -> (StatusCode, Json<User>) {
@@ -61,4 +79,11 @@ struct User {
 #[derive(Deserialize)]
 struct Req {
     username: String,
+}
+
+#[derive(Deserialize)]
+struct Message {
+    mobile: String,
+    password: String,
+    is_agent: bool,
 }
