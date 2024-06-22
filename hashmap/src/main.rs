@@ -3,7 +3,7 @@ use std::fmt;
 use std::ops::{Index, IndexMut};
 
 #[derive(Debug)]
-struct MyMap<K, V> {
+pub struct MyMap<K, V> {
     map: HashMap<K, V>,
 }
 

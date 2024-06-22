@@ -51,7 +51,6 @@ async fn send_extrn(payload: Json<Message>) -> impl IntoResponse {
     let mut req: HashMap<&str, &str> = HashMap::new();
     req.insert("mobile", payload.mobile.as_str());
     req.insert("password", payload.password.as_str());
-    req["user_publickey"] = "user_public_key";
 
     let b = reqwest::Client::new();
     let res = b
